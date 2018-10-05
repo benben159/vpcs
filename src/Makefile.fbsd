@@ -1,12 +1,11 @@
 RM=rm -f
 CC=clang $(CCOPT)
 OSTYPE=FreeBSD
-CPUTYPE=i386
-OPT=-Wall 
+CPUTYPE:=$(shell uname -m)
 HVOPT=-DHV
 
-CFLAGS=-D$(OSTYPE) -D$(CPUTYPE) $(OPT) $(HVOPT) $(DBGOPT) -I. 
-LDFLAGS=-lpthread -lutil -static $(STRIP)
+CFLAGS=-D$(OSTYPE) -D$(CPUTYPE) $(HVOPT) $(DBGOPT) -I.  
+LDFLAGS=-lpthread -lutil
 OBJS=vpcs.o \
 	daemon.o \
 	readline.o \
@@ -34,17 +33,10 @@ debug: all
 all: vpcs
 
 vpcs: $(OBJS)
-	$(CC) $(.ALLSRC) -o $(.TARGET) $(LDFLAGS) 
+	$(CC) $(OBJS) -o vpcs $(LDFLAGS) 
 
 .c.o: vpcs.h packets.h dhcp.h
 	$(CC) $(INCLUDE_PATH) $(CFLAGS) -c $<
 
 clean:
 	$(RM) *.o vpcs
-
-.if make(debug)
-  DBGOPT=-DDEBUG -g
-.else
-  DBGOPT=-O2
-  STRIP=-s
-.endif
